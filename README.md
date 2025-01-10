@@ -130,4 +130,4 @@ For submitting bug report on unchecked error during packing due to incorrect MAX
 
 ## PS
 
-Love and piece, dude. Hope it was useful.
+Love and peace, dude. Hope it was useful.
