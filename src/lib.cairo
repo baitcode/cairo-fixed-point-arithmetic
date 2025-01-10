@@ -197,7 +197,7 @@ pub fn div_u64_by_fixed_point(lhs: u64, rhs: UFixedPoint124x128) -> UFixedPoint1
     lhs.into() / rhs
 }
 
-pub fn mul_fp_by_u128(lhs: UFixedPoint124x128, rhs: u128) -> UFixedPoint124x128 {
+pub fn mul_fixed_point_by_u128(lhs: UFixedPoint124x128, rhs: u128) -> UFixedPoint124x128 {
     let mult_res = lhs.value.wide_mul(rhs.into());
 
     let res = UFixedPoint124x128 {

@@ -26,11 +26,79 @@ This crate was born in an effort to create fixed point datatype for [Ekubo Proto
 - Conversion from `u64`, `u128` and `u256` types.
 - Rounding implementation.
 
-## Usage
+Main type this crate export is:
 
-To use the lib
-
+```cairo
+#[derive(Debug, Drop, Copy, Serde)]
+pub struct UFixedPoint124x128 { 
+    value: u256
+}
 ```
 
+Despite the fact this library don't derive `starknet::Store` it provides `fp::UFixedPoint124x128StorePacking` implementation for use in contract storage.
 
+## Usage
+
+All use-cases are perfectly described by this snippet.
+
+```
+// Basic type import
+use fp::{ UFixedPoint124x128 };
+
+// Store packing implementation import
+use fp::{ UFixedPoint124x128StorePacking };
+
+// Convenience functions to avoid type conversions
+use fp::{
+    div_u64_by_u128, 
+    div_u64_by_fixed_point, 
+    mul_fixed_point_by_u128
+}
+
+fn main() {
+    // Create a fixed point value 1.0
+    let one: UFixedPoint124x128 = 1_u64.into();
+    // Create a fixed point value 100.0
+    let hundred: UFixedPoint124x128 = 100_u64.into();
+    // Calculate a fixed point value 0.01
+    let one_over_hundred = one / hundred;
+    // OR
+    let other_example = div_u64_by_u128(1, 100);
+
+    assert_eq!(one_over_hundred, other_example );
+    
+    let multiplication_is_supported = one_over_hundred * hundred;
+    assert_eq!(multiplication_is_supported, 1_u64.into());
+    
+    let two: UFixedPoint124x128 = 2_u64.into();
+    let three: UFixedPoint124x128 = 3_u64.into();
+    let six: UFixedPoint124x128 = 6_u64.into();
+    let one_over_three = one / three;
+    let one_over_six = one / six;
+
+    // PartialEq is implemented, values are equal if they are close enough.
+    // Difference is less than 1 / 2^124
+    assert_eq!(one_over_three, one_over_six * two);
+}
+```
+
+This crate also provides additional method for `UFixedPoint124x128` type through public 
+`UFixedPoint124x128Impl` which implements `UFixedPointTrait`. 
+
+```
+// Additional methods implementation
+use fp::{ UFixedPoint124x128Impl };
+
+UFixedPoint124x128Impl implements UFixedPointTrait 
+
+trait UFixedPointTrait {
+    // Returns integer part of the fixed point value
+    fn get_integer(self: UFixedPoint124x128) -> u128;
+
+    // Returns fractional part of the fixed point value
+    fn get_fractional(self: UFixedPoint124x128) -> u128;
+    
+    // Rounds fixed point and returns integer part. 0.5 is rounded up.
+    fn round(self: UFixedPoint124x128) -> u128;
+}
 ```

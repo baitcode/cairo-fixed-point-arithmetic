@@ -3,7 +3,7 @@ use core::num::traits::WideMul;
 use super::{
     UFixedPoint124x128, 
     UFixedPointTrait,
-    div_u64_by_u128, mul_fp_by_u128, div_u64_by_fixed_point,
+    div_u64_by_u128, mul_fixed_point_by_u128, div_u64_by_fixed_point,
     MAX_INT
 };
 
@@ -54,7 +54,7 @@ fn test_mul() {
     assert_eq!(expected.limb2, 49);
     assert_eq!(expected.limb3, 0);
     
-    let res: u256 = mul_fp_by_u128(f1.into(), f2.try_into().unwrap()).into();
+    let res: u256 = mul_fixed_point_by_u128(f1.into(), f2.try_into().unwrap()).into();
     assert_eq!(res.high, 49);
     assert_eq!(res.low, 0);
 }
@@ -64,7 +64,7 @@ fn test_mul() {
 fn test_multiplication_overflow() {
     let f1 = MAX_INT - 1;
     let f2 = MAX_INT - 1;
-    let _ = mul_fp_by_u128(f1.into(), f2.try_into().unwrap());
+    let _ = mul_fixed_point_by_u128(f1.into(), f2.try_into().unwrap());
 }
 
 #[test]
@@ -88,7 +88,7 @@ fn run_division_test(left: u64, right: u128, expected_int: u128, expected_frac: 
 
 fn run_division_and_multiplication_test(numenator: u64, divisor: u128, mult: u128, expected_int: u128, expected_frac: u128) {
     let divided = div_u64_by_u128(numenator, divisor);
-    let res = mul_fp_by_u128(divided, mult);
+    let res = mul_fixed_point_by_u128(divided, mult);
 
     assert_eq!(res.get_integer(), expected_int);
     assert_eq!(res.get_fractional(), expected_frac);
