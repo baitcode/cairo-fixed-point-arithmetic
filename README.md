@@ -119,8 +119,10 @@ trait UFixedPointTrait {
 <sub><b>Shramee Srivastav</b></sub>
 </a>
 <br>
-<a href="#design-baitcode" title="Design">🎨</a>
 </td>      
+<td align="center" valign="top">
+For submitting bug report on unchecked error during packing due to incorrect MAX_INT value.
+</td>
 </tr>
 </tbody>
 </table>
