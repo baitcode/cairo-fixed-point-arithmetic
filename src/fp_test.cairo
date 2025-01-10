@@ -1,30 +1,19 @@
 use core::num::traits::WideMul;
 
 use super::{
-    UFixedPoint124x128, 
+    UFixedPoint123x128, 
     UFixedPointTrait,
+    UFixedPoint123x128StorePacking,
     div_u64_by_u128, mul_fixed_point_by_u128, div_u64_by_fixed_point,
     MAX_INT
 };
 
 const SCALE_FACTOR: u256 = 0x100000000000000000000000000000000;
 
-
-pub(crate) impl U64IntoUFixedPoint of Into<u128, UFixedPoint124x128> {
-    fn into(self: u128) -> UFixedPoint124x128 { 
-        let medium = u256 {
-            low: 0,
-            high: self,
-        };
-        medium.into()
-    }
-}
-
-
 #[test]
 fn test_add() {                  
-    let f1 : UFixedPoint124x128 = 0xFFFFFFFFFFFFFFFF_u64.into();
-    let f2 : UFixedPoint124x128 = 1_u64.into();
+    let f1 : UFixedPoint123x128 = 0xFFFFFFFFFFFFFFFF_u64.into();
+    let f2 : UFixedPoint123x128 = 1_u64.into();
     let res = f1 + f2;
     let z: u256 = res.into();
     assert_eq!(z.low, 0);
@@ -33,7 +22,7 @@ fn test_add() {
 
 #[test]
 fn test_fp_value_mapping() {
-    let f1 : UFixedPoint124x128 = 7_u64.into();
+    let f1 : UFixedPoint123x128 = 7_u64.into();
     assert_eq!(f1.get_fractional(), 0x0);
     assert_eq!(f1.get_integer(), 0x7);
 
@@ -74,7 +63,7 @@ fn test_u256_conversion() {
     assert_eq!(f.low, 0x00112233445566778899AABBCCDDEEFF);
     assert_eq!(f.high, 0x0123456789ABCDEFFEDCBA9876543210);
 
-    let fp: UFixedPoint124x128 = f.into();
+    let fp: UFixedPoint123x128 = f.into();
     assert_eq!(fp.get_integer(), f.high);
     assert_eq!(fp.get_fractional(), f.low);
 }
@@ -215,7 +204,7 @@ fn test_division_by_zero() {
 #[test]
 fn test_should_work_fine_with_zeroes() {
     let f1 = div_u64_by_u128(5_u64, 2_u128).into();
-    let f2: UFixedPoint124x128 = 0.into();
+    let f2: UFixedPoint123x128 = 0.into();
 
     let res = f1 + f2;
     assert_eq!(res, f1);
@@ -229,3 +218,31 @@ fn test_should_work_fine_with_zeroes() {
     let res = f2 - f2;
     assert_eq!(res, 0.into());
 }
+
+#[test]
+#[should_panic(expected: 'FELT_OVERFLOW')]
+fn test_shramee_reported_felt_issue() {
+    // Shramee reported that value 0x8a9cb4273ba5a514f94f0f0ad5f31e25d2f0ca885f7ac000000000000000000
+    // despite being a 252 bits long, does not fit felt252.
+    
+    // This integer part fits 124bits
+    let integer_part: u128    =  0x9000000000000000000000000000000_u128;
+    // This integer part fits 128bits
+    let fractional_part: u128 = 0xffffffffffffffffffffffffffffffff_u128;
+    
+    let fp = UFixedPoint123x128 {
+        value: u256 {
+            low: fractional_part,
+            high: integer_part,
+        }
+    };
+    UFixedPoint123x128StorePacking::pack(fp);
+}
+
+#[test]
+#[should_panic(expected: 'INT_VALUE_OVERFLOW')]
+fn test_shramee_reported_felt_issue_fix() {
+    let fp: UFixedPoint123x128 = 0x9000000000000000000000000000000_u128.into();
+    UFixedPoint123x128StorePacking::pack(fp);
+}
+
