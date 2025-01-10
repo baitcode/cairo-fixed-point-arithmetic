@@ -106,3 +106,7 @@ trait UFixedPointTrait {
 ## Contributing
 
 [WIP] but feel free to open issue, discuss it with me and submit PR upon assignment.
+
+## PS
+
+Love and piece, dude. Hope it was useful.
