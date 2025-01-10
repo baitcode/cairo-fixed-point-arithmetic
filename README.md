@@ -1,6 +1,6 @@
 <div align="center">
   <h1 align="center">Cairo Fixed Point Arithmetic</h1>
-  <h3 align="center">Uses 124 bit for integer part and 128 for fractional and packs everything in one felt252 </h3>
+  <h3 align="center">Uses 123 bit for integer part and 128 for fractional and packs everything in one felt252 </h3>
   <img src="https://raw.githubusercontent.com/baitcode/cairo-fixed-point-arithmetic/refs/heads/main/assets/fixed_point_arithmetics.webp" height="200">
   <br />
 
@@ -106,6 +106,25 @@ trait UFixedPointTrait {
 ## Contributing
 
 [WIP] but feel free to open issue, discuss it with me and submit PR upon assignment.
+
+## Special Thanks
+
+<markdown-accessiblity-table data-catalyst=""><table>
+<tbody>
+<tr>
+<td align="center" valign="top" width="14.28%">
+<a href="https://github.com/shramee">
+<img src="https://avatars.githubusercontent.com/u/11048263?v=4?v=4?s=100" width="100px;" alt="Shramee Srivastav" style="max-width: 100%;">
+<br>
+<sub><b>Shramee Srivastav</b></sub>
+</a>
+<br>
+<a href="#design-baitcode" title="Design">🎨</a>
+</td>      
+</tr>
+</tbody>
+</table>
+</markdown-accessiblity-table>
 
 ## PS
 
