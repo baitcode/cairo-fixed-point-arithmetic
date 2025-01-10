@@ -2,5 +2,5 @@
 version = 1
 
 [[package]]
-name = "fixed_point_arithmetics"
+name = "fp"
 version = "0.1.0"
