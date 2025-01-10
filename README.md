@@ -1,6 +1,6 @@
 <div align="center">
   <h1 align="center">Cairo Fixed Point Arithmetic</h1>
-  <h3 align="center">Uses 124 bit for integer part and 128 for fractional and packs everything in one felt252 </h3>
+  <h3 align="center">Uses 123 bit for integer part and 128 for fractional and packs everything in one felt252 </h3>
   <img src="https://raw.githubusercontent.com/baitcode/cairo-fixed-point-arithmetic/refs/heads/main/assets/fixed_point_arithmetics.webp" height="200">
   <br />
 
@@ -30,12 +30,12 @@ Main type this crate export is:
 
 ```cairo
 #[derive(Debug, Drop, Copy, Serde)]
-pub struct UFixedPoint124x128 { 
+pub struct UFixedPoint123x128 { 
     value: u256
 }
 ```
 
-Despite the fact this library don't derive `starknet::Store` it provides `fp::UFixedPoint124x128StorePacking` implementation for use in contract storage.
+Despite the fact this library don't derive `starknet::Store` it provides `fp::UFixedPoint123x128StorePacking` implementation for use in contract storage.
 
 ## Usage
 
@@ -43,10 +43,10 @@ All use-cases are perfectly described by this snippet.
 
 ```cairo
 // Basic type import
-use fp::{ UFixedPoint124x128 };
+use fp::{ UFixedPoint123x128 };
 
 // Store packing implementation import
-use fp::{ UFixedPoint124x128StorePacking };
+use fp::{ UFixedPoint123x128StorePacking };
 
 // Convenience functions to avoid type conversions
 use fp::{
@@ -57,9 +57,9 @@ use fp::{
 
 fn main() {
     // Create a fixed point value 1.0
-    let one: UFixedPoint124x128 = 1_u64.into();
+    let one: UFixedPoint123x128 = 1_u64.into();
     // Create a fixed point value 100.0
-    let hundred: UFixedPoint124x128 = 100_u64.into();
+    let hundred: UFixedPoint123x128 = 100_u64.into();
     // Calculate a fixed point value 0.01
     let one_over_hundred = one / hundred;
     // OR
@@ -70,9 +70,9 @@ fn main() {
     let multiplication_is_supported = one_over_hundred * hundred;
     assert_eq!(multiplication_is_supported, 1_u64.into());
     
-    let two: UFixedPoint124x128 = 2_u64.into();
-    let three: UFixedPoint124x128 = 3_u64.into();
-    let six: UFixedPoint124x128 = 6_u64.into();
+    let two: UFixedPoint123x128 = 2_u64.into();
+    let three: UFixedPoint123x128 = 3_u64.into();
+    let six: UFixedPoint123x128 = 6_u64.into();
     let one_over_three = one / three;
     let one_over_six = one / six;
 
@@ -82,30 +82,51 @@ fn main() {
 }
 ```
 
-This crate also provides additional method for `UFixedPoint124x128` type through public 
-`UFixedPoint124x128Impl` which implements `UFixedPointTrait`. 
+This crate also provides additional method for `UFixedPoint123x128` type through public 
+`UFixedPoint123x128Impl` which implements `UFixedPointTrait`. 
 
 ```cairo
 // Additional methods implementation
-use fp::{ UFixedPoint124x128Impl };
+use fp::{ UFixedPoint123x128Impl };
 
-UFixedPoint124x128Impl implements UFixedPointTrait 
+UFixedPoint123x128Impl implements UFixedPointTrait 
 
 trait UFixedPointTrait {
     // Returns integer part of the fixed point value
-    fn get_integer(self: UFixedPoint124x128) -> u128;
+    fn get_integer(self: UFixedPoint123x128) -> u128;
 
     // Returns fractional part of the fixed point value
-    fn get_fractional(self: UFixedPoint124x128) -> u128;
+    fn get_fractional(self: UFixedPoint123x128) -> u128;
     
     // Rounds fixed point and returns integer part. 0.5 is rounded up.
-    fn round(self: UFixedPoint124x128) -> u128;
+    fn round(self: UFixedPoint123x128) -> u128;
 }
 ```
 
 ## Contributing
 
 [WIP] but feel free to open issue, discuss it with me and submit PR upon assignment.
+
+## Special Thanks
+
+<markdown-accessiblity-table data-catalyst=""><table>
+<tbody>
+<tr>
+<td align="center" valign="top" width="14.28%">
+<a href="https://github.com/shramee">
+<img src="https://avatars.githubusercontent.com/u/11048263?v=4?v=4?s=100" width="100px;" alt="Shramee Srivastav" style="max-width: 100%;">
+<br>
+<sub><b>Shramee Srivastav</b></sub>
+</a>
+<br>
+</td>      
+<td align="center" valign="top">
+For submitting bug report on unchecked error during packing due to incorrect MAX_INT value.
+</td>
+</tr>
+</tbody>
+</table>
+</markdown-accessiblity-table>
 
 ## PS
 
