@@ -41,7 +41,7 @@ Despite the fact this library don't derive `starknet::Store` it provides `fp::UF
 
 All use-cases are perfectly described by this snippet.
 
-```
+```cairo
 // Basic type import
 use fp::{ UFixedPoint124x128 };
 
@@ -85,7 +85,7 @@ fn main() {
 This crate also provides additional method for `UFixedPoint124x128` type through public 
 `UFixedPoint124x128Impl` which implements `UFixedPointTrait`. 
 
-```
+```cairo
 // Additional methods implementation
 use fp::{ UFixedPoint124x128Impl };
 
