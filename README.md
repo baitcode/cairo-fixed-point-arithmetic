@@ -11,22 +11,20 @@
   -
   <a href="https://github.com/baitcode/cairo-fixed-point-arithmetic/discussions">Ask a Question</a>
   </div>
-</div>
-  
-<div align="center">
   <br />
+
 </div>
 
 ## About
 
 This crate was born in an effort to create fixed point datatype for [Ekubo Protocol](https://ekubo.org/) governance. It's specifically taiored to be used in smart-contracts. This library features:
 
-- Fixed Point operations: multiplication, division, addition and substraction
-- Data packing and unpacking for smart contract storage
-- Overflow and underflow checking for add operations
-- Additional convenince methods for better performance without conversions such as u64 by u128 division method.
-- Conversion to most types
-- Rounding implementation
+- Fixed Point datatype that supports operations: multiplication, division, addition and substraction.
+- Data packing and unpacking for smart contract storage.
+- Overflow and underflow checking for all operations.
+- Additional convenince methods for better performance without conversions such as `u64 by u128 division` method.
+- Conversion from `u64`, `u128` and `u256` types.
+- Rounding implementation.
 
 ## Usage
 

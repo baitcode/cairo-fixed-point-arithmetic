@@ -127,6 +127,23 @@ pub impl UFixedPoint124x128ImplSub of Sub<UFixedPoint124x128> {
     }
 }
 
+
+pub impl UFixedPoint124x128ImplMul of Mul<UFixedPoint124x128> {
+    fn mul(lhs: UFixedPoint124x128, rhs: UFixedPoint124x128) -> UFixedPoint124x128 {
+        let mult_res = lhs.value.wide_mul(rhs.into());
+
+        let res = UFixedPoint124x128 {
+            value: u256 {
+                low: mult_res.limb1,
+                high: mult_res.limb2,
+            }
+        };
+
+        assert(res.value.high < MAX_INT, Errors::FP_MUL_OVERFLOW);
+
+        res
+    }
+}
 pub impl UFixedPoint124x128ImplDiv of Div<UFixedPoint124x128> {
     fn div(lhs: UFixedPoint124x128, rhs: UFixedPoint124x128) -> UFixedPoint124x128 {        
         let left: u512 = u512 {
