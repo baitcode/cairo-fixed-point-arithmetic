@@ -3,7 +3,8 @@
   <h3 align="center">Uses 124 bit for integer part and 128 for fractional and packs everything in one felt252 </h3>
   <img src="https://raw.githubusercontent.com/baitcode/cairo-fixed-point-arithmetic/refs/heads/main/assets/fixed_point_arithmetics.webp" height="200">
   <br />
-  
+
+  <div style="text-align: center;">  
   <a href="https://github.com/baitcode/cairo-fixed-point-arithmetic/issues/new?assignees=&labels=bug&template=bug_report.md&title=bug%3A+">Report a Bug</a>
   -
   
@@ -11,8 +12,10 @@
   -
   
   <a href="https://github.com/baitcode/cairo-fixed-point-arithmetic/discussions">Ask a Question</a>
+  </div>
+</div>
   
-  <div align="center">
+<div align="center">
   <br />
 </div>
 
