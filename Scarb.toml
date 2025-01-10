@@ -1,6 +1,6 @@
 [package]
 name = "fp"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Ilia Batii <batiyiv@gmail.com>"]
 description = "Cairo Fixed Point Arithmetics for your smart-contracts"
 license = "MIT-3.0"
