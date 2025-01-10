@@ -7,10 +7,8 @@
   <div style="text-align: center;">  
   <a href="https://github.com/baitcode/cairo-fixed-point-arithmetic/issues/new?assignees=&labels=bug&template=bug_report.md&title=bug%3A+">Report a Bug</a>
   -
-  
   <a href="https://github.com/baitcode/cairo-fixed-point-arithmetic/issues/new?assignees=&labels=enhancement&template=new_feature.md&title=feat%3A+">Request a Feature</a>
   -
-  
   <a href="https://github.com/baitcode/cairo-fixed-point-arithmetic/discussions">Ask a Question</a>
   </div>
 </div>
