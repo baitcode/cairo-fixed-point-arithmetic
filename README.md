@@ -11,6 +11,9 @@
   -
   
   <a href="https://github.com/baitcode/cairo-fixed-point-arithmetic/discussions">Ask a Question</a>
+  
+  <div align="center">
+  <br />
 </div>
 
 ## About
@@ -26,7 +29,7 @@ This crate was born in an effort to create fixed point datatype for [Ekubo Proto
 
 ## Usage
 
-To use the 
+To use the lib
 
 ```
 
