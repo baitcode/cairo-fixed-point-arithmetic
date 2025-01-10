@@ -4,3 +4,5 @@
   <img src="https://raw.githubusercontent.com/baitcode/cairo-fixed-point-arithmetic/refs/heads/main/assets/fixed_point_arithmetics.webp" height="200">
   <br />
 </div>
+
+## About
