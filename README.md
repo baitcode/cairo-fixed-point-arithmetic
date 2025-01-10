@@ -102,3 +102,7 @@ trait UFixedPointTrait {
     fn round(self: UFixedPoint124x128) -> u128;
 }
 ```
+
+## Contributing
+
+[WIP] but feel free to open issue, discuss it with me and submit PR upon assignment.
