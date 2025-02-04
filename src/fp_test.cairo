@@ -2,11 +2,14 @@ use core::num::traits::WideMul;
 
 use super::{
     UFixedPoint123x128, 
+    UFixedPoint123x128Impl,
     UFixedPointTrait,
     UFixedPoint123x128StorePacking,
     div_u64_by_u128, mul_fixed_point_by_u128, div_u64_by_fixed_point,
-    MAX_INT
+    MAX_INT, ONE, ZERO,
 };
+
+use super::pow::pow2;
 
 const SCALE_FACTOR: u256 = 0x100000000000000000000000000000000;
 
@@ -83,6 +86,15 @@ fn run_division_and_multiplication_test(numenator: u64, divisor: u128, mult: u12
     assert_eq!(res.get_fractional(), expected_frac);
 }
 
+#[test]
+fn test_division_isolated() {
+    run_division_test(0x6c9444e9af6eb21, 0xd0ba0d5da1c09d9e57d94820ec138cce, 0x0, 0x852bac969a2350b);
+}
+
+#[test]
+fn test_multiplicationisolated() {
+    run_division_test(0x6c9444e9af6eb21, 0xd0ba0d5da1c09d9e57d94820ec138cce, 0x0, 0x852bac969a2350b);
+}
 
 #[test]
 fn test_division() {
@@ -246,3 +258,19 @@ fn test_shramee_reported_felt_issue_fix() {
     UFixedPoint123x128StorePacking::pack(fp);
 }
 
+#[test]
+fn test_bit_shift_right() {
+    {
+        let mut one: UFixedPoint123x128 = 1.into();
+        let res = one.bit_shift_right(128);
+        assert_eq!(res, UFixedPoint123x128{ value: u256 { high: 0, low: 1 }});
+    }
+    {
+        let res = ONE.bit_shift_right(251);
+        assert_eq!(res, ZERO);
+    }
+    {
+        let res = ONE.bit_shift_right(120);
+        assert_eq!(res, UFixedPoint123x128{ value: u256 { high: 0, low: pow2(8) }});
+    }
+}

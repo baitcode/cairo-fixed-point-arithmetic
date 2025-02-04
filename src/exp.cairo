@@ -1,6 +1,9 @@
-use super::UFixedPointTrait;
+// use super::UFixedPointTrait;
 use super::{UFixedPoint123x128, ONE, ZERO};
-use super::pow::{largest_power_of_2};
+use super::pow::{
+    // largest_power_of_2, 
+    // pow2
+};
 
 // so I can use n! table to reduce multiplication
 // 1 / 35! < 1 / 2^(-128) meaning, my tailor will not converge any more

@@ -1,6 +1,7 @@
 use starknet::storage_access::{StorePacking};
 use core::num::traits::{WideMul, Zero};
 use core::integer::{u512, u512_safe_div_rem_by_u256 };
+use pow::{ pow2 };
 
 pub const EPSILON: u256 = 0x10_u256;
 
@@ -109,6 +110,34 @@ pub impl UFixedPoint123x128Impl of UFixedPointTrait {
             0
         }
     }
+
+    fn one() -> UFixedPoint123x128 { ONE }
+
+    fn bit_shift_right(self: UFixedPoint123x128, n: u8) -> UFixedPoint123x128 {
+        if n > 251 { 
+            return ZERO;
+        }
+        if n > 128 {
+            return UFixedPoint123x128 {
+                value: u256 {
+                    high: 0,
+                    low: self.value.high / pow2((n - 128).into()),
+                }
+            };
+        }
+        if n == 128 {
+            return UFixedPoint123x128 {
+                value: u256 {
+                    high: 0,
+                    low: self.value.high,
+                }
+            };
+        }
+
+        return UFixedPoint123x128 {
+            value: self.value / pow2(n.try_into().unwrap()).into()
+        };
+    }
 }
 
 pub(crate) impl UFixedPoint123x128IntoFelt252 of TryInto<UFixedPoint123x128, felt252> {
@@ -144,10 +173,9 @@ pub impl UFixedPoint123x128ImplSub of Sub<UFixedPoint123x128> {
     }
 }
 
-
 pub impl UFixedPoint123x128ImplMul of Mul<UFixedPoint123x128> {
     fn mul(lhs: UFixedPoint123x128, rhs: UFixedPoint123x128) -> UFixedPoint123x128 {
-        let mult_res = lhs.value.wide_mul(rhs.into());
+        let mult_res = lhs.value.wide_mul(rhs.value);
 
         let res = UFixedPoint123x128 {
             value: u256 {
@@ -161,6 +189,7 @@ pub impl UFixedPoint123x128ImplMul of Mul<UFixedPoint123x128> {
         res
     }
 }
+
 pub impl UFixedPoint123x128ImplDiv of Div<UFixedPoint123x128> {
     fn div(lhs: UFixedPoint123x128, rhs: UFixedPoint123x128) -> UFixedPoint123x128 {        
         let left: u512 = u512 {

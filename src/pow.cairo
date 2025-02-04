@@ -1,5 +1,3 @@
-use super::{UFixedPoint123x128, ZERO};
-
 const POWERS_OF_TWO: [u128; 128] = [
     0x1, 0x2, 0x4, 0x8, 
     0x10, 0x20, 0x40, 0x80, 
@@ -39,25 +37,47 @@ pub fn pow2(exponent: u32) -> u128 {
     (*POWERS_OF_TWO.span()[exponent]).try_into().unwrap()
 }
 
-// TODO: compare with loop implementation
-pub fn largest_power_of_2(in: u128, current_pow: Option<u32>) -> u8 {
-    if in == 1 {
-        return 0;
+fn most_significant_bit(x: NonZero<u128>) -> u8 {
+    let mut x: u128 = x.into();
+    let mut r: u8 = 0;
+
+    if x >= 0x10000000000000000 {
+        x /= 0x10000000000000000;
+        r += 64;
     }
-    
-    let power = if let Option::Some(power) = current_pow {
-        power
-    } else {
-        64
-    };
+    if x >= 0x100000000 {
+        x /= 0x100000000;
+        r += 32;
+    }
+    if x >= 0x10000 {
+        x /= 0x10000;
+        r += 16;
+    }
+    if x >= 0x100 {
+        x /= 0x100;
+        r += 8;
+    }
+    if x >= 0x10 {
+        x /= 0x10;
+        r += 4;
+    }
+    if x >= 0x4 {
+        x /= 0x4;
+        r += 2;
+    }
+    if x >= 0x2 {
+        r += 1;
+    }
+    r
+}
 
-    let power_value = pow2(power);
+#[cfg(test)]
+mod test {
+    use super::{most_significant_bit};
 
-    if in > power_value {
-        let x = in - power_value;
-        // TODO: try to eliminate unwrap
-        power.try_into().unwrap() + largest_power_of_2(x, Option::Some(power / 2))
-    } else {
-        largest_power_of_2(in, Option::Some(power / 2))
+    #[test]
+    fn test_most_significantbit_1() {
+        assert_eq!(most_significant_bit(24_u128.try_into().unwrap()), 4_u8);
+        assert_eq!(most_significant_bit(340282366920938463463374607431768211455_u128.try_into().unwrap()), 127_u8);
     }
 }
