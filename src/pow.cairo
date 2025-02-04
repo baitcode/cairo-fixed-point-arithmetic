@@ -37,7 +37,7 @@ pub fn pow2(exponent: u32) -> u128 {
     (*POWERS_OF_TWO.span()[exponent]).try_into().unwrap()
 }
 
-fn most_significant_bit(x: NonZero<u128>) -> u8 {
+pub fn most_significant_bit(x: NonZero<u128>) -> u8 {
     let mut x: u128 = x.into();
     let mut r: u8 = 0;
 

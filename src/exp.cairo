@@ -1,6 +1,8 @@
+use super::UFixedPointTrait;
 // use super::UFixedPointTrait;
 use super::{UFixedPoint123x128, ONE, ZERO};
 use super::pow::{
+    most_significant_bit
     // largest_power_of_2, 
     // pow2
 };
@@ -29,7 +31,23 @@ fn exp_power(i: u8) -> UFixedPoint123x128 {
 }
 
 // pub fn exponentiation_base_e(x: UFixedPoint123x128) -> UFixedPoint123x128 {
-//     let z = largest_power_of_2(x.get_integer(), Option::None);
+//     let mb = most_significant_bit(x.get_integer().try_into().unwrap());
+//     x.bit_shift_right(mb);
+//     exp_power(mb)
+    
+    // let z = largest_power_of_2(x.get_integer(), Option::None);
 //     let shifted_x = x.bit_shift_right(z);
 //     return exp_power_2i(z) * as_tailor_calculation_series(x, 80);
 // }
+
+#[cfg(test)]
+mod test {
+    use super::{as_tailor_calculation_series, ONE, ZERO};
+
+    #[test]
+    fn zzz() {
+        let e = as_tailor_calculation_series(ONE, 34);
+        assert_eq!(e, ZERO);
+    }
+
+}
