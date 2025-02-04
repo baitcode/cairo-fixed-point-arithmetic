@@ -82,15 +82,15 @@ pub impl UFixedPoint123x128Zero of Zero<UFixedPoint123x128> {
     fn is_non_zero(self: @UFixedPoint123x128) -> bool { !self.is_zero() }
 }
 
-pub(crate) impl U256IntoUFixedPoint of Into<u256, UFixedPoint123x128> {
+pub impl U256IntoUFixedPoint of Into<u256, UFixedPoint123x128> {
     fn into(self: u256) -> UFixedPoint123x128 { UFixedPoint123x128 { value: self } }
 }
 
-pub(crate) impl UFixedPointIntoU256 of Into<UFixedPoint123x128, u256> {
+pub impl UFixedPointIntoU256 of Into<UFixedPoint123x128, u256> {
     fn into(self: UFixedPoint123x128) -> u256 { self.value }
 }
 
-pub(crate) impl Felt252IntoUFixedPoint of Into<felt252, UFixedPoint123x128> {
+pub impl Felt252IntoUFixedPoint of Into<felt252, UFixedPoint123x128> {
     fn into(self: felt252) -> UFixedPoint123x128 { 
         let medium: u256 = self.into();
         medium.into()
@@ -111,7 +111,7 @@ pub impl UFixedPoint123x128Impl of UFixedPointTrait {
     }
 }
 
-pub(crate) impl UFixedPoint123x128IntoFelt252 of TryInto<UFixedPoint123x128, felt252> {
+pub impl UFixedPoint123x128IntoFelt252 of TryInto<UFixedPoint123x128, felt252> {
     fn try_into(self: UFixedPoint123x128) -> Option<felt252> { 
         self.value.try_into()
     }
@@ -251,9 +251,3 @@ pub impl U128IntoUFixedPoint of Into<u128, UFixedPoint123x128> {
         medium.into()
     }
 }
-
-#[cfg(test)]
-mod fp_test;
-
-mod exp;
-mod pow;
