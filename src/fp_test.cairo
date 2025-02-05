@@ -6,7 +6,7 @@ use super::{
     UFixedPointTrait,
     UFixedPoint123x128StorePacking,
     div_u64_by_u128, mul_fixed_point_by_u128, div_u64_by_fixed_point,
-    MAX_INT, ONE, ZERO,
+    MAX_INT, ONE, ZERO, HALF
 };
 
 use super::pow::pow2;
@@ -49,6 +49,24 @@ fn test_mul() {
     let res: u256 = mul_fixed_point_by_u128(f1.into(), f2.try_into().unwrap()).into();
     assert_eq!(res.high, 49);
     assert_eq!(res.low, 0);
+}
+
+#[test]
+fn test_mul2() {
+    let a: UFixedPoint123x128 = 6_u64.into();
+    let one: UFixedPoint123x128 = 1_u64.into();
+    let b: UFixedPoint123x128 = one / 2_u64.into();
+    
+    assert_eq!(a * b, 3_u64.into())
+}
+
+#[test]
+fn test_mul3() {
+    let a: UFixedPoint123x128 = 6_u128.into();
+    let one: UFixedPoint123x128 = 1_u128.into();
+    let b: UFixedPoint123x128 = one / 2_u128.into();
+    
+    assert_eq!(a * b, 3_u128.into())
 }
 
 #[test]

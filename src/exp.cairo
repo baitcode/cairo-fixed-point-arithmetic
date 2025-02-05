@@ -1,53 +1,285 @@
 use super::UFixedPointTrait;
-// use super::UFixedPointTrait;
-use super::{UFixedPoint123x128, ONE, ZERO};
-use super::pow::{
-    most_significant_bit
-    // largest_power_of_2, 
-    // pow2
+
+use super::{UFixedPoint123x128, ONE, ZERO, div_u64_by_u128};
+use super::pow::{most_significant_bit};
+use super::{Errors};
+
+fn as_tailor_expansion_dyn(x: UFixedPoint123x128, n: u8) -> UFixedPoint123x128 {
+    assert(x.get_integer() < 85, Errors::EXPONENT_IS_TOO_LARGE);
+
+    let mut sum: UFixedPoint123x128 = ZERO;
+    let mut acc: UFixedPoint123x128 = ONE;
+    for number in 1_u8..n {
+        // TODO: maybe optimise a bit
+        sum = sum + acc;
+        acc = acc * x / number.into()
+    };
+    return sum;
+}
+
+fn as_tailor_expansion_static(x: UFixedPoint123x128) -> UFixedPoint123x128 {
+    assert(x.get_integer() < 85, Errors::EXPONENT_IS_TOO_LARGE);
+
+    let x0  = ONE;
+    let x1  = x0 * x;
+    let x2  = x1 * x;
+    let x3  = x2 * x;
+    let x4  = x3 * x;
+    let x5  = x4 * x;
+    let x6  = x5 * x;
+    let x7  = x6 * x;
+    let x8  = x7 * x;
+    let x9  = x8 * x;
+    let x10 = x9 * x;
+    let x11 = x10 * x;
+    let x12 = x11 * x;
+    let x13 = x12 * x;
+    let x14 = x13 * x;
+    let x15 = x14 * x;
+    let x16 = x15 * x;
+    let x17 = x16 * x;
+    let x18 = x17 * x;
+    let x19 = x18 * x;
+
+    return (
+        x0 + 
+        x1 + 
+        div_u64_by_u128(1, 2)                  * x2  + 
+        div_u64_by_u128(1, 6)                  * x3  +
+        div_u64_by_u128(1, 24)                 * x4  +
+        div_u64_by_u128(1, 120)                * x5  +
+        div_u64_by_u128(1, 720)                * x6  +
+        div_u64_by_u128(1, 5040)               * x7  +
+        div_u64_by_u128(1, 40320)              * x8  +
+        div_u64_by_u128(1, 362880)             * x9  +
+        div_u64_by_u128(1, 3628800)            * x10 +
+        div_u64_by_u128(1, 39916800)           * x11 +
+        div_u64_by_u128(1, 479001600)          * x12 +
+        div_u64_by_u128(1, 6227020800)         * x13 +
+        div_u64_by_u128(1, 87178291200)        * x14 +
+        div_u64_by_u128(1, 1307674368000)      * x15 +
+        div_u64_by_u128(1, 20922789888000)     * x16 +
+        div_u64_by_u128(1, 355687428096000)    * x17 +
+        div_u64_by_u128(1, 6402373705728000)   * x18 +
+        div_u64_by_u128(1, 121645100408832000) * x19 +
+        ZERO
+    );
+}
+
+/// Returns value of f(x) = exp^x
+/// where x - is positive fixed point number
+/// 
+/// This function uses power reduction algorythm, 
+/// it treats exp^x = exp^(int(x) + frac(x)) = exp^int(x) + exp^frac(x)
+/// where exp^int(x) is calculated using table lookup (85 values with high precision)
+/// and exp^frac(x) is calculated using 21 element Taylor expansion for exp(x).
+///
+/// # Panics
+///
+/// This function will panic if `x` is greated than 84. It happens bescause e^84 can't fit 
+/// the range for fixed point number i.e. is larger than MAX_INT constant 
+/// 
+/// # Examples
+///
+/// ```
+/// let x = ONE / 12_u64.into() + ONE * 12_u64.into();
+/// let res = exp_power_static(x, 21);
+/// assert_eq!(60195556617878488491148569440858830649560569, res.value);
+/// ```
+pub fn exp_power_static(x: UFixedPoint123x128) -> UFixedPoint123x128 {
+    if x == ZERO {
+        return ONE;
+    }
+    
+    let n: u32 = x.get_integer().try_into().expect('TOO_LARGE');
+    assert(n < E_POW_LEN + 1, 'TOO LARGE');
+
+    let f = x.get_fractional_as_fixed_point();
+
+    let res = as_tailor_expansion_static(f);
+
+    let mult: UFixedPoint123x128 = {
+        let val: u256 = (*E_POW.span()[n]).try_into().unwrap();
+        val.into()
+    };
+
+    return res * mult;
+}
+
+/// Returns value of f(x) = exp^x
+/// where x - is positive fixed point number
+/// and with_precision defines Taylor expansion serie length.
+/// 
+/// This function uses power reduction algorythm, 
+/// it treats exp^x = exp^(int(x) + frac(x)) = exp^int(x) + exp^frac(x)
+/// where exp^int(x) is calculated using table lookup (85 values with high precision)
+/// and exp^frac(x) is calculated using Taylor expansion for exp(x).
+///
+/// # Panics
+///
+/// This function will panic if `x` is greated than 84. It happens bescause e^84 can't fit 
+/// the range for fixed point number i.e. is larger than MAX_INT constant 
+/// 
+/// # Examples
+///
+/// ```
+/// let x = ONE / 12_u64.into() + ONE * 12_u64.into();
+/// let res = exp_power_dyn(x, 21);
+/// assert_eq!(60195556617878488491148569440858830649723323, res.value);
+/// ```
+pub fn exp_power_dyn(x: UFixedPoint123x128, with_precision: u8) -> UFixedPoint123x128 {
+    if x == ZERO {
+        return ONE;
+    }
+    
+    let n: u32 = x.get_integer().try_into().expect('TOO_LARGE');
+    assert(n < E_POW_LEN + 1, 'TOO LARGE');
+
+    let f = x.get_fractional_as_fixed_point();
+
+    let res = as_tailor_expansion_dyn(f, with_precision);
+
+    let mult: UFixedPoint123x128 = {
+        let val: u256 = (*E_POW.span()[n]).try_into().unwrap();
+        val.into()
+    };
+
+    return res * mult;
+}
+
+pub const E: UFixedPoint123x128 = UFixedPoint123x128 {
+    value: 340282366920938463463374607431768211456
 };
 
-// so I can use n! table to reduce multiplication
-// 1 / 35! < 1 / 2^(-128) meaning, my tailor will not converge any more
-// Can't calculate f(x) = e^x for x > 85 - out of range
-
-fn as_tailor_calculation_series(x: UFixedPoint123x128, n: u8) -> UFixedPoint123x128 {
-    let mut sum: UFixedPoint123x128 = ZERO;
-    // TODO: maybe u256?!
-    let mut fac: u128 = 1;
-    let mut numenator = ONE;
-    for number in 1..n {
-        // TODO: maybe optimise a bit
-        fac = fac * number.into();
-        numenator = numenator * x;
-        // TODO: optimize and measure
-        sum = sum + numenator / fac.into();
-    };
-    return numenator;
-}
-
-fn exp_power(i: u8) -> UFixedPoint123x128 {
-    ZERO
-}
-
-// pub fn exponentiation_base_e(x: UFixedPoint123x128) -> UFixedPoint123x128 {
-//     let mb = most_significant_bit(x.get_integer().try_into().unwrap());
-//     x.bit_shift_right(mb);
-//     exp_power(mb)
+const TAILOR_EXPANSION_PRECISION_DEFAULT: u8 = 21;  
+const TAILOR_EXPANSION_PRECISION: u8 = 35;  
+const E_POW_LEN: u32 = 84;
+const E_POW: [u256; E_POW_LEN] = [
+    340282366920938463463374607431768211456,
+    924983374546220337150911035843336795063,
+    2514365498655717699434277416465328696973,
+    6834754045100203352782362684486003079403,
+    18578787722782836492235669422995900914155,
+    50502381061638590010053149766929220244745,
+    137279704733766404528564625531825993809421,
+    373164926794020389796596697795276277125345,
+    1014367439522435506293930954162796521009903,
+    2757336578234365975078160713954485341839205,
     
-    // let z = largest_power_of_2(x.get_integer(), Option::None);
-//     let shifted_x = x.bit_shift_right(z);
-//     return exp_power_2i(z) * as_tailor_calculation_series(x, 80);
-// }
+    7495217915559919573679589385952004519405821,
+    20374114660207211894399581469650116533153311,
+    55382585651782299066544140264490163224846366,
+    150545476190316471430031984626141652045901770,
+    409225032284851117407547495560177624791000414,
+    1112388969010476913394951547454622431527320635,
+    3023786720639471391386628479363219963056598659,
+    8219504495850042509587405884264120511276028616,
+    22342929710006596342681384972010623222241274674,
+    60734379825248656025810407080793636010943282612,
+
+    165093161041703064937725492911217171285040023297,
+    448769739662524220558885584806796002659576860887,
+    1219882628486936052121041055353715431756976611072,
+    3315984781868894714184398439250419911617952270673,
+    9013781176000947394656842403892467607837463751245,
+    24501997576429578315103122686591228944306673093967,
+    66603334772956089099916985333523771552487198187731,
+    181046634628100986328884864175215725365920908581655,
+    492135777013231044290728746851879742280805479483935,
+    1337763739789638646849207698942684675846499117036342,
+    
+    3636418864641589347204903782517661207573017088841459,
+    9884811320420904809133460274688232306625543953124983,
+    26869702990046406393059941713898830362033351181704010,
+    73039425373934820508084737505518963419171858741707873,
+    198541742755057527654926531477245297686688508391500724,
+    539692411521663173550831277865711112757264288064483874,
+    1467036075196578063069157890265228830879271298338213660,
+    3987817504900735597044975366443925581005792800637933352,
+    10840011858782559142391119546187109726668228487499570022,
+    29466207256009188515120191868430000021993312788577301421,
+
+    80097455737617842986687269198530311812524363980914931865,
+    217727458437369274020104240644814171286483843628829445201,
+    591844593826872926097181250629317207068892952371860916677,
+    1608800404671313093945125379427032379180845139881086203425,
+    4373172905635588856579559794756891875169373312957225620986,
+    11887516442098664164658236745318436220973077854074645386157,
+    32313619930064920764877753199559515119252344574976467640502,
+    87837525867627518241566584696455264601226951871259075760058,
+    238767150422773214044159374520785562007133331611043521827434,
+    649036406227171867863519909556205803688092094790263589163750,
+
+    1764263869055684398100170613347043429513238929532135405436016,
+    4795766415860915342467129542753546177446334258425561318816037,
+    13036244701768890873976631089255393056800388915670685255863427,
+    35436187084163881535783515453051596537533934301442155830577611,
+    96325543420757798592986249815026530050803791287428640777153189,
+    261839974297088663655387845124990943272286382155546791517418543,
+    711754844095959580347183521357408958782653999440181821052427698,
+    1934750259023747685407109378200210706604137900327907918107961633,
+    5259196471710684241716139610120999546120913623401265030425990734,
+    14295978201347078129865366334391786891074582051806629386554594339,
+
+    38860497764768388279452158026703696298807439151422855345012512878,
+    105633784918843254831529016952859553661867445429056063564461515249,
+    287142398016242760048986915337787231317380740826705150525142428448,
+    780533962707707293157009021875629198920151329880561051114456622939,
+    2121711287323490807149623713423883655567519230936470269780111940039,
+    5767409237567893275855864970476544163712571076296254195380381615280,
+    15677443727767640938880838584197645268424940880901299821849376406221,
+    42615710401880013216449401498960944571418438692347333472488057933254,
+    115841511192303555774151100425440324368129503989973118496475903126119,
+    314889874855273862890421769509504500903845086581015695757769395826812,
+
+    855959424784833768173907709459344959382856619380077777909815562590442,
+    2326738950290870537637108368655975359445147457297917176527776122597650,
+    6324732208143547125817762614186511389237999134294779296469033071659347,
+    17192404631266255952650099032120338375583961373033373909014131747368664,
+    46733801096686195616054507443838240943068495573760314676647588967269351,
+    127035642295941485285283408053727286992961943403681827331812860488632622,
+    345318678019681043919201032935853794206034721154939544378980546235492504,
+    938673487488398901867481880853850936684337793840358713228652206466722699,
+    2551579083895993687752105191758764602733789044901160956498701715119750748,
+    6935911057630657304526676825548217574580598993218509476353545263831264554,
+    
+    18853760991765573410478413238158081388047243001254595216856780320827886935,
+    51249835902026344989595090075893248208211536757622242548240847585064437425,
+    139311497643986194946296976727643478901541945527513775538330202397844515538,
+    378687912541062766429762284142475067284038841050773710055173741687179584689,
+];
 
 #[cfg(test)]
 mod test {
-    use super::{as_tailor_calculation_series, ONE, ZERO};
+    use super::{as_tailor_expansion_static, as_tailor_expansion_dyn, ONE};
+    use super::{exp_power_dyn, exp_power_static};
 
     #[test]
-    fn zzz() {
-        let e = as_tailor_calculation_series(ONE, 34);
-        assert_eq!(e, ZERO);
+    #[available_gas(1290270)]
+    fn test_static_tailor_expansion_call() {
+        let z1 = as_tailor_expansion_static(ONE);
+        assert_eq!(924983374546220337004067372080735529783, z1.value);
+    }
+
+    #[test]
+    #[available_gas(1391870)]
+    fn test_dynamic_tailor_expansion_call() {
+        let z2 = as_tailor_expansion_dyn(ONE, 21);
+        assert_eq!(924983374546220337004067372080735529783, z2.value);
+    }
+
+    #[test]
+    fn test_epow_static() {
+        let x = ONE / 12_u64.into() + ONE * 12_u64.into();
+        let res = exp_power_static(x);
+        assert_eq!(60195556617878488491148569440858830649560569, res.value);
+    }
+
+    #[test]
+    fn test_epow_dyn() {
+        let x = ONE / 12_u64.into() + ONE * 12_u64.into();
+        let res = exp_power_dyn(x, 21);
+        assert_eq!(60195556617878488491148569440858830649723323, res.value);
     }
 
 }

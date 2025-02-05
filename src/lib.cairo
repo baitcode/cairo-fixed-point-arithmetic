@@ -1,6 +1,10 @@
 use starknet::storage_access::{StorePacking};
 use core::num::traits::{WideMul, Zero};
 use core::integer::{u512, u512_safe_div_rem_by_u256 };
+
+pub mod exp;
+mod pow;
+
 use pow::{ pow2 };
 
 pub const EPSILON: u256 = 0x10_u256;
@@ -24,13 +28,6 @@ pub const ZERO: UFixedPoint123x128 = UFixedPoint123x128 {
     }
 };
 
-
-// 124.128 (= 252 which 1 felt exactly) 
-#[derive(Debug, Drop, Copy, Serde)]
-pub struct UFixedPoint123x128 { 
-    value: u256
-}   
-
 pub mod Errors {
     pub const FP_ADD_OVERFLOW: felt252 = 'FP_ADD_OVERFLOW';
     pub const FP_SUB_OVERFLOW: felt252 = 'FP_SUB_OVERFLOW';
@@ -40,7 +37,15 @@ pub mod Errors {
     pub const FELT_OVERFLOW: felt252 = 'FELT_OVERFLOW';
     pub const INT_VALUE_OVERFLOW: felt252 = 'INT_VALUE_OVERFLOW';
     pub const DIVISION_BY_ZERO: felt252 = 'DIVISION_BY_ZERO';
+
+    pub const EXPONENT_IS_TOO_LARGE: felt252 = 'EXP_TOO_LARGE';
 }
+
+// 124.128 (= 252 which 1 felt exactly) 
+#[derive(Debug, Drop, Copy, Serde)]
+pub struct UFixedPoint123x128 { 
+    value: u256
+}   
 
 pub impl UFixedPoint123x128StorePacking of StorePacking<UFixedPoint123x128, felt252> {
     fn pack(value: UFixedPoint123x128) -> felt252 {
@@ -112,6 +117,15 @@ pub impl UFixedPoint123x128Impl of UFixedPointTrait {
     }
 
     fn one() -> UFixedPoint123x128 { ONE }
+
+    fn get_fractional_as_fixed_point(self: UFixedPoint123x128) -> UFixedPoint123x128 { 
+        UFixedPoint123x128 {
+            value: u256 {
+                high: 0,
+                low: self.value.low,
+            }
+        }
+    }
 
     fn bit_shift_right(self: UFixedPoint123x128, n: u8) -> UFixedPoint123x128 {
         if n > 251 { 
@@ -258,6 +272,17 @@ pub fn mul_fixed_point_by_u128(lhs: UFixedPoint123x128, rhs: u128) -> UFixedPoin
     res
 }
 
+pub impl U8IntoUFixedPoint of Into<u8, UFixedPoint123x128> {
+    fn into(self: u8) -> UFixedPoint123x128 { 
+        UFixedPoint123x128 { 
+            value: u256 {
+                low: 0,            // fractional 
+                high: self.into(), // integer
+            }
+        } 
+    }
+}
+
 pub impl U64IntoUFixedPoint of Into<u64, UFixedPoint123x128> {
     fn into(self: u64) -> UFixedPoint123x128 { 
         UFixedPoint123x128 { 
@@ -283,6 +308,3 @@ pub impl U128IntoUFixedPoint of Into<u128, UFixedPoint123x128> {
 
 #[cfg(test)]
 mod fp_test;
-
-mod exp;
-mod pow;
