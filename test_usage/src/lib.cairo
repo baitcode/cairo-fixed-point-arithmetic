@@ -32,4 +32,7 @@ fn main() {
 
     // PartialEq is implemented, values are equal if they are close enough.
     // Difference is less than 1 / 2^124
+
+    // Calculate exponent
+    let e_pow_2 = exp_power_static(two); // calculate e^2
 }

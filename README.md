@@ -84,8 +84,8 @@ fn main() {
     // Difference is less than 1 / 2^124
     assert_eq!(one_over_three, one_over_six * two);
 
-    // Calculate exponent
-    exp_power_static(two); // calculate e^2
+    // Calculate square of exponent 
+    let e_pow_2 = exp_power_static(two); // calculate e^2
 }
 ```
 
