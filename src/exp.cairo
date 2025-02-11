@@ -1,8 +1,20 @@
 use super::UFixedPointTrait;
 
-use super::{UFixedPoint123x128, ONE, ZERO, div_u64_by_u128};
-use super::pow::{most_significant_bit};
+use super::{UFixedPoint123x128, ONE, ZERO};
 use super::{Errors};
+
+fn as_continued_fraction_dyn(x: UFixedPoint123x128, n: u8) -> UFixedPoint123x128 {
+    assert(x.get_integer() < 85, Errors::EXPONENT_IS_TOO_LARGE);
+
+    let mut acc: UFixedPoint123x128 = (n + 1).into();
+    
+    for idx in 0_u8..n {
+        let number = n - idx; 
+        let additional_x = if (number > 1) { x } else { ZERO };
+        acc = additional_x + number.into() - number.into() * x / acc
+    };
+    return ONE + x / acc;
+}
 
 fn as_tailor_expansion_dyn(x: UFixedPoint123x128, n: u8) -> UFixedPoint123x128 {
     assert(x.get_integer() < 85, Errors::EXPONENT_IS_TOO_LARGE);
@@ -18,7 +30,7 @@ fn as_tailor_expansion_dyn(x: UFixedPoint123x128, n: u8) -> UFixedPoint123x128 {
 }
 
 fn as_tailor_expansion_static(x: UFixedPoint123x128) -> UFixedPoint123x128 {
-    assert(x.get_integer() < 85, Errors::EXPONENT_IS_TOO_LARGE);
+    assert(x.get_integer() < 2, Errors::EXPONENT_IS_TOO_LARGE);
 
     let x0  = ONE;
     let x1  = x0 * x;
@@ -44,27 +56,65 @@ fn as_tailor_expansion_static(x: UFixedPoint123x128) -> UFixedPoint123x128 {
     return (
         x0 + 
         x1 + 
-        div_u64_by_u128(1, 2)                  * x2  + 
-        div_u64_by_u128(1, 6)                  * x3  +
-        div_u64_by_u128(1, 24)                 * x4  +
-        div_u64_by_u128(1, 120)                * x5  +
-        div_u64_by_u128(1, 720)                * x6  +
-        div_u64_by_u128(1, 5040)               * x7  +
-        div_u64_by_u128(1, 40320)              * x8  +
-        div_u64_by_u128(1, 362880)             * x9  +
-        div_u64_by_u128(1, 3628800)            * x10 +
-        div_u64_by_u128(1, 39916800)           * x11 +
-        div_u64_by_u128(1, 479001600)          * x12 +
-        div_u64_by_u128(1, 6227020800)         * x13 +
-        div_u64_by_u128(1, 87178291200)        * x14 +
-        div_u64_by_u128(1, 1307674368000)      * x15 +
-        div_u64_by_u128(1, 20922789888000)     * x16 +
-        div_u64_by_u128(1, 355687428096000)    * x17 +
-        div_u64_by_u128(1, 6402373705728000)   * x18 +
-        div_u64_by_u128(1, 121645100408832000) * x19 +
+        (*INVERSE_FACTORIAL.span()[2]).into() * x2 + 
+        (*INVERSE_FACTORIAL.span()[3]).into() * x3 +
+        (*INVERSE_FACTORIAL.span()[4]).into() * x4 +
+        (*INVERSE_FACTORIAL.span()[5]).into() * x5 +
+        (*INVERSE_FACTORIAL.span()[6]).into() * x6 +
+        (*INVERSE_FACTORIAL.span()[7]).into() * x7 +
+        (*INVERSE_FACTORIAL.span()[8]).into() * x8 +
+        (*INVERSE_FACTORIAL.span()[9]).into() * x9 +
+        (*INVERSE_FACTORIAL.span()[10]).into() * x10 +
+        (*INVERSE_FACTORIAL.span()[11]).into() * x11 +
+        (*INVERSE_FACTORIAL.span()[12]).into() * x12 +
+        (*INVERSE_FACTORIAL.span()[13]).into() * x13 +
+        (*INVERSE_FACTORIAL.span()[14]).into() * x14 +
+        (*INVERSE_FACTORIAL.span()[15]).into() * x15 +
+        (*INVERSE_FACTORIAL.span()[16]).into() * x16 +
+        (*INVERSE_FACTORIAL.span()[17]).into() * x17 +
+        (*INVERSE_FACTORIAL.span()[18]).into() * x18 +
+        (*INVERSE_FACTORIAL.span()[19]).into() * x19 +
         ZERO
     );
 }
+
+const INVERSE_FACTORIAL: [u256; 35] = [
+    340282366920938463463374607431768211456,
+    340282366920938463463374607431768211456,
+    170141183460469231731687303715884105728,
+    56713727820156410577229101238628035242,
+    14178431955039102644307275309657008810,
+    2835686391007820528861455061931401762,
+    472614398501303421476909176988566960,
+    67516342643043345925272739569795280,
+    8439542830380418240659092446224410,
+    937726981153379804517676938469378,
+    93772698115337980451767693846937,
+    8524790737757998222887972167903,
+    710399228146499851907331013991,
+    54646094472807680915948539537,
+    3903292462343405779710609966,
+    260219497489560385314040664,
+    16263718593097524082127541,
+    956689329005736710713384,
+    53149407166985372817410,
+    2797337219315019621968,
+    139866860965750981098,
+    6660326712654808623,
+    302742123302491301,
+    13162701013151795,
+    548445875547991,
+    21937835021919,
+    843762885458,
+    31250477239,
+    1116088472,
+    38485809,
+    1282860,
+    41382,
+    1293,
+    39,
+    1,
+];
 
 /// Returns value of f(x) = exp^x
 /// where x - is positive fixed point number
@@ -251,11 +301,13 @@ const E_POW: [u256; E_POW_LEN] = [
 
 #[cfg(test)]
 mod test {
-    use super::{as_tailor_expansion_static, as_tailor_expansion_dyn, ONE};
-    use super::{exp_power_dyn, exp_power_static};
-
+    use super::{
+        as_tailor_expansion_static, as_tailor_expansion_dyn, exp_power_dyn,
+        exp_power_static, as_continued_fraction_dyn, ONE
+    };
+    
     #[test]
-    #[available_gas(1290270)]
+    #[available_gas(1161390)]
     fn test_static_tailor_expansion_call() {
         let z1 = as_tailor_expansion_static(ONE);
         assert_eq!(924983374546220337004067372080735529783, z1.value);
@@ -266,6 +318,14 @@ mod test {
     fn test_dynamic_tailor_expansion_call() {
         let z2 = as_tailor_expansion_dyn(ONE, 21);
         assert_eq!(924983374546220337004067372080735529783, z2.value);
+    }
+
+    #[test]
+    #[available_gas(1443650)]
+    fn test_dynamic_continued_fraction_call() {
+        let res = as_continued_fraction_dyn(ONE, 18);
+        // Converges faster, but is more expensive gas wise
+        assert_eq!(924983374546220337159474995376014397677, res.value);
     }
 
     #[test]
