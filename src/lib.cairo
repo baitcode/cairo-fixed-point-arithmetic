@@ -14,6 +14,13 @@ pub const EPSILON: u256 = 0x10_u256;
 pub const MAX_INT: u128 = 0x8000000000000110000000000000000_u128;
 pub const HALF: u128    = 0x80000000000000000000000000000000_u128;
 
+pub const E: UFixedPoint123x128 = UFixedPoint123x128 {
+    value: 340282366920938463463374607431768211456
+};
+pub const PI: UFixedPoint123x128 = UFixedPoint123x128 {
+    value: 1069028584064966747859680373000000000000
+};
+
 pub const ONE: UFixedPoint123x128 = UFixedPoint123x128 {
     value: u256 {
         high: 1,

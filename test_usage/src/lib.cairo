@@ -9,7 +9,8 @@ use fp::{ UFixedPoint123x128StorePacking };
 use fp::{
     div_u64_by_u128, 
     div_u64_by_fixed_point, 
-    mul_fixed_point_by_u128
+    mul_fixed_point_by_u128,
+    E, PI // High precision constants
 };
 
 fn main() {

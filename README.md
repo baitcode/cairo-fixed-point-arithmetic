@@ -26,6 +26,7 @@ This crate was born in an effort to create fixed point datatype for [Ekubo Proto
 - Conversion from `u64`, `u128` and `u256` types.
 - Rounding implementation.
 - Exponent function calculation added: f(x) = e^x
+- High precision PI and E constants
 
 Main type this crate export is:
 
