@@ -1,0 +1,13 @@
+[package]
+name = "test_fp_usage"
+version = "0.0.1"
+authors = ["Ilia Batii <batiyiv@gmail.com>"]
+description = "Just for test"
+license = "MIT-3.0"
+edition = "2024_07"
+
+[dependencies]
+fp = { path = ".." }
+
+[dev-dependencies]
+cairo_test = "2.7.0"

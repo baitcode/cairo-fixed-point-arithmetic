@@ -25,6 +25,8 @@ This crate was born in an effort to create fixed point datatype for [Ekubo Proto
 - Additional convenince methods for better performance without conversions such as `u64 by u128 division` method.
 - Conversion from `u64`, `u128` and `u256` types.
 - Rounding implementation.
+- Exponent function calculation added: f(x) = e^x
+- High precision PI and E constants
 
 Main type this crate export is:
 
@@ -53,7 +55,10 @@ use fp::{
     div_u64_by_u128, 
     div_u64_by_fixed_point, 
     mul_fixed_point_by_u128
-}
+};
+
+// Exponent import
+use fp::exp::{ exp_power_static, exp_power_dyn };
 
 fn main() {
     // Create a fixed point value 1.0
@@ -79,6 +84,9 @@ fn main() {
     // PartialEq is implemented, values are equal if they are close enough.
     // Difference is less than 1 / 2^124
     assert_eq!(one_over_three, one_over_six * two);
+
+    // Calculate square of exponent 
+    let e_pow_2 = exp_power_static(two); // calculate e^2
 }
 ```
 
